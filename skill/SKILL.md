@@ -1,17 +1,19 @@
 ---
-name: handoff
-description: Generate a structured handoff brief from an old Claude Code session's JSONL. Use when user types /handoff <session-id-or-keywords> or asks to "handoff from session X" / "summarize session X for handoff".
+name: hand
+description: Generate a structured brief from an old Claude Code session's JSONL so the user can paste it into a NEW session to pick up the work. Use when user types /hand <session-id-or-keywords> or asks to summarize an old session to resume in a fresh conversation. Output goes to chat (not written to disk). Distinct from the claude-remember SessionStart hook which writes ".remember/remember.md" — do not conflate.
 ---
 
-# /handoff — Session handoff brief
+# /hand — Session brief from old conversation
 
 Generate a compact Markdown brief from a prior Claude Code session JSONL so the user can continue the work in a fresh session without rereading the entire conversation.
+
+**Output destination:** chat (for the user to paste into a new session). Do NOT write the brief to `.remember/remember.md` or any other file — that path belongs to the separate claude-remember SessionStart hook, which is unrelated to this skill.
 
 ## Invocation
 
 The user supplies one of:
-- A session UUID, UUID prefix (e.g. `a1b2c3d4`), or absolute path to a `.jsonl` → **ID path**.
-- A keyword / phrase (e.g. `"auth refactor"`) → **search path**.
+- A session UUID, UUID prefix (e.g. `abc03363`), or absolute path to a `.jsonl` → **ID path**.
+- A keyword / phrase (e.g. `"skill review session"`) → **search path**.
 
 ### Argument shape detection
 
@@ -22,12 +24,12 @@ Treat the argument as an ID if it matches `^[0-9a-f]{4,32}(-[0-9a-f-]+)?$` OR en
 Run the helper and stream stdout verbatim:
 
 ```bash
-python3 ~/.claude/skills/handoff/handoff.py <session-id-or-prefix>
+python3 ~/.claude/skills/hand/hand.py <session-id-or-prefix>
 ```
 
 Always quote the argument. Capture both stdout and stderr.
 
-- Exit 0: stdout is the Markdown brief. Present it as-is — that IS the handoff. Do not rewrite or summarize.
+- Exit 0: stdout is the Markdown brief. Present it as-is — that IS the brief. Do not rewrite or summarize.
 - Exit 1: no JSONL matched. Show stderr; ask for a more specific id.
 - Exit 2: prefix matched multiple files. Stderr lists candidates with project dir + mtime. Ask user to pick one.
 
@@ -81,7 +83,7 @@ Always quote the argument. Capture both stdout and stderr.
 
    Then ask: *"Which one? Pick a number or paste a UUID prefix."*
 
-5. **On user pick**: extract that candidate's UUID (full or 8-char prefix) and run the **ID path** above: `python3 ~/.claude/skills/handoff/handoff.py <uuid>`.
+5. **On user pick**: extract that candidate's UUID (full or 8-char prefix) and run the **ID path** above: `python3 ~/.claude/skills/hand/hand.py <uuid>`.
 
 ## What the brief contains
 

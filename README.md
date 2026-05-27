@@ -1,14 +1,14 @@
-# claude-handoff
+# claude-hand
 
-Compact handoff briefs for Claude Code sessions.
+Compact session briefs for Claude Code.
 
 ## Flow
 
 In a fresh session, type:
 
 ```
-/handoff <session-id-prefix>          # direct ID/prefix lookup
-/handoff "<any keywords>"             # fuzzy search, requires claude-history
+/hand <session-id-prefix>          # direct ID/prefix lookup
+/hand "<any keywords>"             # fuzzy search, requires claude-history
 ```
 
 The skill locates the matching `~/.claude/projects/*/<id>.jsonl`, parses it with a stdlib-only Python script (zero LLM calls, zero API cost), and prints a structured Markdown brief. You read the brief and continue the work in the new session.
@@ -20,20 +20,20 @@ Measured on a real 1.1 MB / 686-line session:
 | | Tokens |
 |---|---:|
 | Raw JSONL into context (what most session-loader tools do) | ~298,000 |
-| handoff brief | ~970 |
+| session brief | ~970 |
 | **Ratio** | **1 / 307** |
 
 Deterministic parser — no LLM summarization at runtime. Output is stable run-to-run.
 
 ## Comparison
 
-Why compare: the Claude Code ecosystem has 15+ session-handoff / session-loader projects, and most fall into one of three patterns — (a) instruct the **active** session to write a brief from its own in-memory context (regenerating what the dying session already has), (b) `cat` the raw JSONL and let the new session's model parse 300K tokens from scratch, or (c) hook on `SessionEnd`, summarize via a small model, auto-load on `SessionStart`. `claude-handoff` belongs to a fourth category: deterministic parser, on demand, zero LLM at runtime.
+Why compare: the Claude Code ecosystem has 15+ session-handoff / session-loader projects, and most fall into one of three patterns — (a) instruct the **active** session to write a brief from its own in-memory context (regenerating what the dying session already has), (b) `cat` the raw JSONL and let the new session's model parse 300K tokens from scratch, or (c) hook on `SessionEnd`, summarize via a small model, auto-load on `SessionStart`. `claude-hand` belongs to a fourth category: deterministic parser, on demand, zero LLM at runtime.
 
 Surveyed alternatives:
 
 | Project | Approach | Runtime LLM | Brief size (1.1 MB session) | Triggered |
 |---|---|---|---|---|
-| **claude-handoff (this)** | Deterministic Python parser | None | **~970 tok** | On demand |
+| **claude-hand (this)** | Deterministic Python parser | None | **~970 tok** | On demand |
 | [ccdiag](https://github.com/kolkov/ccdiag) | Deterministic Go parser (this project's reference) | None | ~970 tok | On demand |
 | [AccidentalRebel/claude-skill-session-retrospective](https://github.com/accidentalrebel/claude-skill-session-retrospective) | `cat` raw JSONL → in-session model parses | current session | ~298,000 tok (raw) | On demand |
 | [REMvisual/claude-handoff](https://github.com/REMvisual/claude-handoff) | Active session writes brief from in-memory context | current session | varies | Mid-session |
@@ -44,7 +44,7 @@ Surveyed alternatives:
 
 Approaches (a) and (b) re-pay (in current-model tokens) for context the source session already has on disk. Approach (c) is fine for continuous background memory but doesn't help when you want to start a new session **right now** from one specific old one. The two MCP servers are great when you don't know which session you want and need to search across history; they don't replace a focused brief.
 
-`claude-handoff` is the on-demand, deterministic path: you supply an ID or keyword, you get a brief, you're moving in seconds.
+`claude-hand` is the on-demand, deterministic path: you supply an ID or keyword, you get a brief, you're moving in seconds.
 
 ## Brief contents
 
@@ -53,7 +53,7 @@ Header (file / period / model / version) · stats table · files modified · ope
 ## Install
 
 ```bash
-cp -r skill ~/.claude/skills/handoff
+cp -r skill ~/.claude/skills/hand
 ```
 
 Restart Claude Code. Python 3.8+, stdlib only. Optional: `cargo install claude-history` for the keyword search path.

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Generate a handoff brief from a Claude Code session JSONL.
 
-Reimplements ccdiag's `--output handoff` mode in a single stdlib-only script.
-Improvement over ccdiag: filters <task-notification> / <system-reminder>
-messages out of the "Last N User Messages" section and backfills from
-earlier real messages.
+Reimplements ccdiag's `--output handoff` mode (https://github.com/kolkov/ccdiag)
+in a single stdlib-only script. Improvement over ccdiag: filters
+<task-notification> / <system-reminder> messages out of the "Last N User
+Messages" section and backfills from earlier real messages.
 """
 from __future__ import annotations
 
